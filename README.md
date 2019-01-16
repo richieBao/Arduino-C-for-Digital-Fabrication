@@ -7,5 +7,6 @@
 * 在机器人建造中，具备基本的自行电子设备制作能力，可以让相关智能化建造活动更加自如；
 * Arduino C是C语言的变种，在科学实验中掌握至少2门语言很有必要，首选python用于数据分析，以及机器学习/深度学习等内容，而C则可以在嵌入式系统中发挥特长。
 
-# [沐本工坊](http://robot-x.top/robot/index.php)
+# [沐本工坊](http://robot-x.top/robot/index.php) 
 ![](images/801.jpeg)
+> 更多内容查看
