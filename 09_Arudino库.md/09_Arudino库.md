@@ -1,4 +1,4 @@
-> by richieball
+> by richieBao
 
 > 实验器材：Arduino UNO(1)，面包板(1)，电阻(10kΩ(4，上拉/下拉电阻))，GY-521三轴加速度计电子陀螺仪(1)，AT24C64 EEPROM存储器(1)，OLED显示屏(1)，Tiny RTC I2C可充电电池DS1307芯片时钟模块(1)
 
@@ -425,7 +425,7 @@ const unsigned char  F8X16[][16]=
 ```
 *主程序*
 ```C
-///richieball 2018-05-01
+///richieBao 2018-05-01
 extern const unsigned char F6X8[][6];
 extern const unsigned char F8X16[][16];
 
@@ -517,7 +517,7 @@ void IIC_Write_DAT(byte dat){
 
 **程序**
 ```C
-//richieball 2016-10-10
+//richieBao 2016-10-10
 //modified by richieball 2018-05-01
 #include <Wire.h>  //包含Arduino的TWI库
 //#define uchar unsigned char
