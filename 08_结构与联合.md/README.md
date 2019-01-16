@@ -1,641 +1,584 @@
-# 07_指针_B
-## 指针变量的运算
-由于指针变量的特殊性，可以对指针变量做有限的运算，例如赋值运算、部分算数运算和关系运算。
-* 只有指向同一数组的两个指针变量之间才能进行运算，否则无意义；
-* 指针变量的加减运算只能对数组指针变量进行，对指向其它类型变量的指针变量无意义；
-* 两个指针变量之间不能进行加法运算，即两个地址相加无意义。
+> by richieBao
 
-### 关系运算
+> 实验器材：Arduino UNO(1)，面包板(1)，电阻(100Ω(2，限流电阻))，LED灯(1)，DHT11温湿度传感器(1)，共阳极数码管(1)
+# 08_结构与联合
+虽然数组能够条理化的存储数据，但是数组是把具有相同数据类型的若干变量按有序形式组织起来的集合。如果需要存储不同类型的数据在一个变量或结构中，例如同时包含商品名称(字符型)、编码(整型)、数量(整型)、单价(浮点型)、出口国(字符型)等数据，就需要再选择一个更好表示数据的的方法。结构变量(structure variable)则增强了表达数据的能力，结构的基本形式足以灵活的存储各类型数据。
+## 结构
+### 结构的定义与声明
+结构是一种构造类型，是由数目固定、类型不同的若干有序成员集合而成的数据类。其中每一个成员可以是一个基本数据类型，甚至可以是一个构造类型。结构不是基本的数据类型，需要在使用之前进行定义，结构的一般定义形式：
+![](_v_images/_1525093603_26375.jpg)
 
-对于指向同一数组的两个指针变量做关系运算，即为指针所指向数组元素之间的关系运算。如果指针变量ptr_a和ptr_b指向同一个数组，则<、>、>=、<=、==等关系运算符都可以使用。
+>  //对于字符型数据，一般使用字符指针，才能顺利编译
 
-* ptr_a==ptr_b为真，则表示ptr_a和ptr_b指向同一数组元素；
-* ptr_a<ptr_b为真，则表示ptr_a处于低地址位置，而ptr_b处于高地址位置；
-* ptr_a>ptr_b为真，则表示ptr_a处于高地址位置，而ptr_a处于低地址位置。
-
-当未给指针变量赋值时，即为空指针，其值为0，不指向任何变量。因此指针变量可以与0比较。
-
-* pt==0为真时，表示pt为空指针；
-* pt!=0为真时，表示pt非空指针。
-
-### 算数运算
-
-指针变量和整数可进行简单的加、减运算。如果ptr为指向数组array的指针变量，开始时指向数组的某个元素，设n为一个正整数，则如下运算合法。
-
-* ptr+n，指针变量指向的位置向前移动n个位置；
-* ptr-n，指针变量指向的位置向后移动n个位置；
-* ptr++，指针变量指向的位置向后移动1个位置；
-* ptr--，指针变量指向的位置向前移动1个位置；
-* ++ptr，先取指针变量的当前位置，再将指针变量指向的位置向后移动1个位置；
-* --ptr，先取指针变量的当前位置，再将指针变量指向的位置向前移动1个位置。
-
-指针变量加减整数n，是把指针指向某一数组元素的当前位置前后移动n个位置。因为数组有不同类型，即数组的元素类型不同，不同类型的元素所占字节长度不同(*即指针的标量，例如int的标量为2byte，而指针的运算会自动适应数据类型的标量*)。因此，指针变量的加减1，即向前后移动1个位置时，为指针变量指向前一个或者下一个数组元素的首地址，而不是原地址加减1。
-
-不论指针变量指向何种数据类型，指针和整数进行加减运算时，编译程序总根据所指对象的数据长度对n放大，char(字长8)类型放大因子为1，int(16)和short为2，long和float(32)为4，double为8.
-
-两个指针变量在一定条件下，可以进行减法运算。两指针变量相减所得之差是两个指针所指数组元素之间相差的元素个数。实际上是两个指针，即地址相减的差再除以该数组元素的长度，即字节数。例如，ptr_1和ptr_2是指向同一浮点(字长32，4个字节)数组两个指针变量，如果ptr_1=2030H，ptr_2=2050H，则ptr_1-ptr_2=(2050H-2010H)/4=64D/4=16，表示ptr_1和ptr_2之间相差16个元素，每个元素4字节。
-
-### 实验程序
+该结构定义结构名即标记为form，由5类数据商品名称Pname、编码Pcode、数量Pnum、价格Pprice、出口国Pexporter组成，包含char、int、float三种数据类型。结构定义只是描述了组成form结构对象的元素存储类型及如何存储。在定义结构之后，需要再声明结构变量。
+### 结构变量的声明
 ```C
-//Dr.Purdum,August 20,2012
-//modified on 29 Apr 2018 by richieBao
-#include <string.h>
-
-void setup() {
-  Serial.begin(9600);
-}
-
-void loop() {
-  char buffer[50];
-  char *ptr;
-  int i;
-  int length;
-  strcpy(buffer,"digit-x,编程让设计更具创造力！");
-  ptr=buffer;
-  length=strlen(buffer);
-  Serial.print("指针的地址:");
-  Serial.println((unsigned int)&ptr);
-  Serial.print("指针指向地址的值：");
-  Serial.println((unsigned int)ptr);
-  while(*ptr){
-    Serial.print(*ptr++);
-  }
-  Serial.println("");
-  ptr=buffer;
-  Serial.println("给定数组部分数据的地址：");
-  Serial.println(*(ptr+2));
-  Serial.println(*(ptr+7));
-  Serial.println(*(ptr+8));  //注意汉字占用的byte数
-  Serial.flush();//确保所有数据送出
-  exit(0);
-}
+//1.先定义结构再声明结构变量
+struct form{
+	char *Pname;
+	int Pcode;
+	int Pnum;
+	float Pprice;
+	char *Pexporter;
+};
+struct form fruit,vegetation; //可以一次声明多个结构变量
+//2.在定义结构的同时，声明结构变量
+struct form{
+	char *Pname;
+	int Pcode;
+	int Pnum;
+	float Pprice;
+	char *Pexporter;
+}fruit,vegetation;
+//3.直接说明结构变量
+struct {
+	char *Pname;
+	int Pcode;
+	int Pnum;
+	float Pprice;
+	char *Pexporter;
+}fruit,vegetation;
+/*
+未给出结构名，直接声明结构变量fruit、vegetation。需要注意，直接说明结构变量的方法，可以使用此处声明的两个结构变量，而不能再额外声明其他结构的变量。
+*/
+//声明的结构变量fruit、vegetation均包含结构定义中的Pname、Pcode、Pnum、Pprice、Pexporter五个部分。
 ```
+### 访问结构(变量)成员
+访问数组元素时，可以使用下标访问数组的各个元素。而访问结构成员时，可以使用结构成员运算浮点"."。例如fruit.Pname 即访问结构变量fruit的Pname字段(数据库中使用字段表示结构中的单个成员数据)
 
-**运算结果**
-```
-指针的地址:2298
-指针指向地址的值：2248
-digit-x,编程让设计更具创造力！
-给定数组部分数据的地址：
-g
-,
-⸮
-```
-## 数组指针
-数组是把具有相同数据类型的若干变量按有序形式组织起来的集合。数组是有序存放于连续的存储单元中，数组名就是数组在存储单元中的首地址。数组指针是指向数组的指针变量，可以指向数组的首地址或数组元素的地址，即指针可以指向数组或数组元素。因此，对于数组而言，除了使用下标，也可以使用指针引用数组和数组元素。
-### 指向一维数组的指针
-由于数组元素连续存储于存储单元中，因此通过指针变量及有关运算可以间接访问数组中的任何一个元素。如果定义数组array和指向该数组元素首地址的指针变量ptr，则：
-*  array+i和ptr+i，均表示数组元素array[i]的地址，即指向数组第i个元素，因为数组名表示数组的首地址，而指针变量ptr也指向数组的首地址，因此array+i和ptr+i都是地址加i；
-* (array+i)和*(ptr+i)，因为array+i和ptr+i相同，均为数组元素array[i]的地址，而*为取内容运算符，因此*(array+i)和*(ptr+i)即为array[i]的值；
-* C允许指针变量带下标，即指向数组元素的指针也可以用数组的形式表示，即pt[i]与*(ptr+i)等价；
-*  int array[12],*ptr; ptr=array+5;，该语句中赋予指向数组的指针变量初值并不是数组array的首地址，而是首地址+5所指向的地址，因此pt[2]为array[7]，pt[-2]为array[5]。
+* fruit.Pprice 即访问结构变量fruit的Pprice字段
+* vegetation.Pname  即访问结构变量vegetation的Pname字段
 
-#### 实验程序(一维数组)
+本质上.Pname，.Pprice，.Pname在form结构中具有下标作用。结构变量fruit、vegetation是结构类型，而fruit.Pname、fruit.Pprice或vegetation.Pname则为具体数据类型字符型、浮点型和字符型，可以像使用任何其他数据类型变量一样来使用。例如，&(fruit.Pname)为获取Pname字段的首地址，注意结构成员运算浮点"."优先级高于取地址运算符"&"，因此需要圆括弧调整优先级。
+
+### 结构的嵌套
+嵌套结构是一个结构中包含另一个结构。例如在form的结构中Price字段又包含国内价格和国外价格两类数据，可以使用嵌套结构来定义。
 ```C
-//richieBao 2018-04-28
-#define months 12
-int days[months]={31,28,31,30,31,30,31,31,30,31,30,31};  //定义一维数组，包含12个元素
-int idx,*pt=days;  //声明整型变量Idx，以及声明指针变量pt并初始化为数组days的首地址
-
-void setup() {
-  Serial.begin(9600);
+struct form{  
+	char *Pname;
+	int Pcode;
+	int Pnum;
+	struct price Pprice;  //声明子结构变量Pprice，Pprice则具有price结构所包含的字段domestic和abroad
+	char *Pexporter;
 }
-
-void loop() {
-  for(idx=0;idx<months;idx++){  //循环数组
-    Serial.println("Month x has x days. pt[idx]=x,*(pt+idx)=x,days[idx]=x");
-    Serial.println(idx+1);
-    Serial.println(*(days+idx));
-    Serial.println(pt[idx]);
-    Serial.println(*(pt+idx));
-    Serial.println(days[idx]);
-  }
-  Serial.flush();
-  exit(0);
-}
+struct price{
+	float domestic;
+	float abroad;
+};
+struct form fruit,vegetation;
 ```
-**运算结果**
-```
-Month x has x days. pt[idx]=x,*(pt+idx)=x,days[idx]=x
-1
-31
-31
-31
-31
-Month x has x days. pt[idx]=x,*(pt+idx)=x,days[idx]=x
-2
-28
-28
-28
-28
-Month x has x days. pt[idx]=x,*(pt+idx)=x,days[idx]=x
-3
-31
-31
-31
-31
-Month x has x days. pt[idx]=x,*(pt+idx)=x,days[idx]=x
-4
-30
-30
-30
-30
-Month x has x days. pt[idx]=x,*(pt+idx)=x,days[idx]=x
-5
-31
-31
-31
-31
-Month x has x days. pt[idx]=x,*(pt+idx)=x,days[idx]=x
-6
-30
-30
-30
-30
-Month x has x days. pt[idx]=x,*(pt+idx)=x,days[idx]=x
-7
-31
-31
-31
-31
-Month x has x days. pt[idx]=x,*(pt+idx)=x,days[idx]=x
-8
-31
-31
-31
-31
-Month x has x days. pt[idx]=x,*(pt+idx)=x,days[idx]=x
-9
-30
-30
-30
-30
-Month x has x days. pt[idx]=x,*(pt+idx)=x,days[idx]=x
-10
-31
-31
-31
-31
-Month x has x days. pt[idx]=x,*(pt+idx)=x,days[idx]=x
-11
-30
-30
-30
-30
-Month x has x days. pt[idx]=x,*(pt+idx)=x,days[idx]=x
-12
-31
-31
-31
-31
-```
-对于一维数组如果int array[3],*ptr;则具有如下等价关系：
-* array+i=ptr+i;
-* array[i]=*(array+i)=ptr[i]=*(ptr+i)
-
-![](_v_images/_1524977605_1947.jpg)
-
-### 指向二维数组的指针
-`int array_t[3][5]={{2，4，6，8，10}，{1，3，5，7，9}，{12，14，16，18，20}};  //定义整型3行，5列包含15个元素的二维数组array_t`
-![](_v_images/_1524977906_8361.jpg)
-
-二维数组同样需要根据元素的类型对地址作适当的放大。例如array_t[3][5]声明为二维整型数组，每个数组元素占两个字节的存储单元。因此，假设array_t的首地址为0x1000，array_t+1的地址则为0x100A，即0x1000+2×5D=0x1000+0x000A=0x100A，array_t+2的地址则为，即0x1000+4×5D=0x1000+0x0014=0x1014。
-在C51中，array_t[0]、array_t[1]、array_t[2]可以看作3行一维数组名，分别代表每行一维数组的首地址，因此：
-* array_t[0]代表第0行第0列元素的地址，即&array_t[0][0];array_t[1]则是第1行第0列元素的地址，即&array_t[1][0]。
-* array_t[0]+1代表第0行第1列的地址，即&array_t[0][1]；则array_t[i]+j代表第i行第j列的地址，即&array_t[i][j]。
-
-因为数组名类似于指针变量，因此：
-* array[0]=&array[0][0]=*(array+0);
-*  array[i]+j=&array[i][j]=*(array+i)+j;
-* array[i][j]=*(array[i]+j)=*(*(array+i)+j)=(*(array+i))[j];
-
-对于二维数组如果int array[3][5],*ptr;ptr=array;则具有如下等价关系：
-* array=*array=array[0]=ptr;
-* array[i]=*(array+i)=*(ptr+i)
-* &array[i][j]=array[i]+j=*(array+i)+j=*(ptr+i)+j;
-* array[i][j]=*(array[i]+j)=*(*(array+i)+j)=*(*(ptr+i)+j)=(*(ptr+i))[j]。
-
-#### 实验程序(二维数组)
-```C
-//richieBao 2018-04-28
-#include <stdio.h>
-int array_t[3][5]={{2,4,6,8,10},{1,3,5,7,9},{12,14,16,18,20}};
-int *ptr,i,j;
-
-void setup() {
-  Serial.begin(9600);
-}
-
-void loop() {
-  for(i=0;i<3;i++) for(j=0;j<5;j++){
-    Serial.println("array_t[%d][%d]=%d  *(*(array_t+%d)+%d)=%d\n");    
-    Serial.print(i);
-    Serial.print(" ");
-    Serial.println(j);
-    Serial.println(array_t[i][j]);
-    Serial.println(*(*(array_t+i)+j));
-  }
-  for(ptr=array_t[0];ptr<array_t[3];ptr++) Serial.println(*ptr);
-  Serial.flush();
-  exit(0);
-}
-```
-**实验结果**
-```
-array_t[%d][%d]=%d  *(*(array_t+%d)+%d)=%d
-
-0 0
-2
-2
-array_t[%d][%d]=%d  *(*(array_t+%d)+%d)=%d
-
-0 1
-4
-4
-array_t[%d][%d]=%d  *(*(array_t+%d)+%d)=%d
-
-0 2
-6
-6
-array_t[%d][%d]=%d  *(*(array_t+%d)+%d)=%d
-
-0 3
-8
-8
-array_t[%d][%d]=%d  *(*(array_t+%d)+%d)=%d
-
-0 4
-10
-10
-array_t[%d][%d]=%d  *(*(array_t+%d)+%d)=%d
-
-1 0
-1
-1
-array_t[%d][%d]=%d  *(*(array_t+%d)+%d)=%d
-
-1 1
-3
-3
-array_t[%d][%d]=%d  *(*(array_t+%d)+%d)=%d
-
-1 2
-5
-5
-array_t[%d][%d]=%d  *(*(array_t+%d)+%d)=%d
-
-1 3
-7
-7
-array_t[%d][%d]=%d  *(*(array_t+%d)+%d)=%d
-
-1 4
-9
-9
-array_t[%d][%d]=%d  *(*(array_t+%d)+%d)=%d
-
-2 0
-12
-12
-array_t[%d][%d]=%d  *(*(array_t+%d)+%d)=%d
-
-2 1
-14
-14
-array_t[%d][%d]=%d  *(*(array_t+%d)+%d)=%d
-
-2 2
-16
-16
-array_t[%d][%d]=%d  *(*(array_t+%d)+%d)=%d
-
-2 3
-18
-18
-array_t[%d][%d]=%d  *(*(array_t+%d)+%d)=%d
-
-2 4
-20
-20
-2
-4
-6
-8
-10
-1
-3
-5
-7
-9
-12
-14
-16
-18
-20
-```
-### 指向一个由n个元素组成的数组指针
-C中引入一个指向n个元素构成的数组指针。方便二维数组的处理，格式为：类型标识符 (*指针名)[n];
-* int array[3][5];  //定义二维数组
-* int (*ptr)[5];  //声明指针，包含参数[5]
-* ptr=array;  //指针赋值数组首地址
-
-> 指针pt是指向一个由列数，即5个元素组成的整型数组指针，当对该指针加1运算，其地址址实际上增加了2×5=10，相当于指向数组各行的元素。
-
-#### 实验程序(含参数指针)
+### 结构变量的赋值
 ```C
 //richieBao 2018-04-30
-int array_t[3][5]={{2,4,6,8,10},{1,3,5,7,9},{12,14,16,18,20}};
-int i,(*ptr)[5]=array_t;
-
-void setup() {
-  Serial.begin(9600);
-}
-
-void loop() {
-  for(i=0;i<3;i++){
-    Serial.print(*ptr[i]);
-    Serial.print(" ");
-    Serial.println(*(ptr[i]+1));
-  }
-  ptr=&array_t[0];  //重新初始化数组指针
-  Serial.println((long)&array_t[0][3],DEC);
-  Serial.println((long)&array_t[0],DEC);
-  for(i=0;i<3;i++) Serial.println(*ptr[i]);
-  Serial.flush();
-  exit(0);
-}
-```
-**实验结果**
-```
-2 4
-1 3
-12 14
-262
-256
-2
-1
-12
-```
-
-## 字符指针
-字符指针指向字符串，然后通过字符指针来访问字符串的存储区域。
-### 实验程序(字符指针-1)
-```C
-//richieBao 2018-04-30
-  char str[]="Hi digit-x!";
-  char *pt="Hi digit-x!";
-void setup() {
-  Serial.begin(9600);
-}
-
-void loop() {
-  Serial.println(str);
-  Serial.println(*pt);
-  Serial.println(pt[0]);
-  Serial.println(pt[5]);
-  Serial.println((*(pt+5)));
-  Serial.flush();
-  exit(0);
-}
-```
-**实验结果**
-```
-Hi digit-x!
-H
-H
-g
-g
-```
-声明char str_array1[3][50]={"Hello ","caDesign ","Everybody should learn programming!"};数组，其中列的下标值为50，虽然最小应该为所包含各字符串中的最大长度，即36，但是部分字符串长度远小于36，例如Hello 只有6个(包括空格)，会浪费单片机的资源，而指针数组可以有效解决这个问题。可以定义为char *str_array1[3]={"Hello ","caDesign ","Everybody should learn programming!"};
-### 实验程序(字符指针-2)
-```C
-//richieBao 2018-04-30
-int i;char *str_array[3]={"Hello ","数字营造学社","Everybody should learn programming!"};
-void setup() {
-  Serial.begin(9600);
-}
-
-void loop() {
-  for(i=0;i<3;i++){
-    Serial.print(i);
-    Serial.print(":");
-    Serial.println(str_array[i]);
-    }  
-    Serial.flush();
-    exit(0);
-}
-```
-**实验结果**
-```
-0:Hello 
-1:数字营造学社
-2:Everybody should learn programming!
-```
-
-## 函数指针
-可以用指针调用函数。基本语法为：`float (*funPtr)(int x); funPtr=calculateSqrt; float result=(*funPtr)(readSD);`其中`float (*funPtr)(int x); `定义函数指针，即指向函数的指针，float数据类型为函数返回值数据类型，（int x）为传入的参数。`funPtr=calculateSqrt; `中calculateSqrt为自定义的函数，将函数指针指向该函数。`float result=(*funPtr)(readSD);`是使用函数指针，传入参数返回值。
-
-如果不返回值则写作`void(*funPtr)(int x);`。如何既不返回值，也不传入参数则写作`void(*funPtr)();`
-### 实验程序(函数指针)
-```C
-//richieBao 2018-04-30
-int incomingByte = 0;
-
-void setup() {
-  Serial.begin(9600);
-}
-
-void loop() {
-  if (Serial.available() > 0) {
-    char readSerialData[20];
-    int index= readLine(readSerialData); 
-    int readSD=atoi(readSerialData);
-    Serial.print("sqrt(");Serial.print(readSD);Serial.print(")=");
-    float (*funPtr)(int x);
-    funPtr=calculateSqrt;
-    float result=(*funPtr)(readSD);
-    Serial.println(result);    
-  }
-  //Serial.flush();
-  //exit(0);
-}
-
-float calculateSqrt(int val){
-  return sqrt(val);
-}
-
-int readLine(char str[]){
-  char c;
-  int index=0;  
-  while (true){
-    if (Serial.available()>0){
-      c=Serial.read();      
-      if(c!= '#'){
-        str[index++]=c;   
-        //Serial.print("ok");  //用于调试标识
-      }else{
-        str[index]='\0';        
-        break;
-      }
-    }
-  }
-  return index;
-}
-```
-**实验结果**
-```
-sqrt(100)=10.00
-sqrt(99)=9.95
-```
-### 函数指针数组
-#### 枚举
-枚举类型主要用于将变量的取值限定在一个有限范围内。枚举类型在定义中列举出所有可能的取值，被声明为该类型的变量取值不能超过定义的范围。枚举可以明了表示取值，并节约存储空间。
-
-**枚举定义形式**
-```C
-enum 枚举名{
-标识符[=整型常量];
-标识符[=整型常量];
-…
-}；
-```
-**枚举变量的声明**
-```C
-//1.定义枚举时声明枚举变量
-enum 枚举名{
-标识符[=整型常量];
-标识符[=整型常量];
-…
-}枚举变量；
-//2.先定义枚举，再定义枚举变量
-enum 枚举名{
-标识符[=整型常量];
-标识符[=整型常量];
-…
-}；
-enum 枚举名 枚举变量名；
-//3.直接声明枚举变量(没有枚举名)
-enum  {
-标识符[=整型常量];
-标识符[=整型常量];
-…
-}枚举变量；
-```
-#### 实验（枚举）
-```C
-//richieBao 2018-04-30
-enum weekday{Monday,Tuesday,Wednsday,Thurday,Friday,Saturday,Sunday}a;
-void setup() {
-  Serial.begin(9600);
-}
-
-void loop() {
-  a=Monday;Serial.println(a);
-  a=Tuesday;Serial.println(a);
-  a=Wednsday;Serial.println(a);
-  a=Thurday;Serial.println(a);
-  a=Friday;Serial.println(a);
-  a=Saturday;Serial.println(a);
-  a=Sunday;Serial.println(a);
-  Serial.flush();
-  exit(0);
-}
-```
-**运行结果**
-```
-0
-1
-2
-3
-4
-5
-6
-```
-枚举元素本身由系统定义了一个表示序号的数组。
-
-此例中通过调用函数，返回计算结果，使用函数指针，根据不同结果进一步调用不同函数。
-### 实验程序(函数指针-共阳数码管/DHT11温湿度传感器)
-**电路图**
-![](_v_images/_1525091333_1523.jpg)
-
-```C
-//richieBao 2018-04-30
-#include <Adafruit_Sensor.h>
-#include <DHT.h>
-#include <DHT_U.h>
-#define DHTPIN 8
-#define DHTTYPE DHT11 // DHT 11
-DHT_Unified dht(DHTPIN, DHTTYPE);
-uint32_t delayMS;
-
-byte idx=0;
-const byte LEDs[13]{
-  //B1111110, //0x7E
-  0x7E,
-  B0110000,
-  B1101101,
-  B1111001,
-  B0110011,
-  B1011011,
-  B1011111,
-  B1110000,
-  B1111111,
-  B1111011,
-  //B0001110, //0xE
-  0xE,
- // B0110111,//0x37
-  0x37,
-  //B0000001 //0x1
-  0x1
+struct form{  //定义form结构
+  char *Pname;  
+  int Pcode;
+  int Pnum;
+  float Pprice;
+  char *Pexporter;
 };
 
-enum humidityRank {HIGHVAL,MODERATEVAL,LOWVAL};
-enum humidityRank whichRank;
-const int highVal=37;
-const int lowVal=10;
-
-const int ledPin=12;
-
 void setup() {
-  DDRD=0x7F;
+  Serial.begin(9600);
+  struct form fruit;  //声明fruit结构变量
+  fruit.Pname="apple";
+  fruit.Pcode=001;
+  fruit.Pnum=33;
+  fruit.Pprice=10.2;
+  fruit.Pexporter="London";
+  Serial.print("name=");Serial.println(fruit.Pname);
+  Serial.print("exporter=");Serial.println(fruit.Pexporter);
+  Serial.print("code=");Serial.println(fruit.Pcode);
+  Serial.print("num=");Serial.println(fruit.Pnum);
+  Serial.print("price=");Serial.println(fruit.Pprice);
 }
 
 void loop() {
-  static void (*funcPtr[])()={LEDHighWarning,LEDModerate,LEDLowWarning};     
-  delay(delayMS);
-  sensors_event_t event;    
-  //读取湿度数据并串口打印
-  dht.humidity().getEvent(&event);
-  if (isnan(event.relative_humidity)) {
-   digitalWrite(ledPin,HIGH);
-  } else {
-    whichRank=(enum humidityRank) whichRankJudge(event.relative_humidity);
-    (*funcPtr[whichRank])();
-  }  
-  delay(1000);
-}
-
-int whichRankJudge(float humidity){
-  if (humidity<lowVal){
-    return LOWVAL;
-  }else{
-    if (humidity>highVal) {
-      return HIGHVAL;
-    }else return MODERATEVAL;    
-  }
-}
-
-void LEDHighWarning(){
-  PORTD=~LEDs[11];
-}
-
-void LEDModerate(){
-  PORTD=~LEDs[12];
-}
-
-void LEDLowWarning(){
-  PORTD=~LEDs[10];
+  // put your main code here, to run repeatedly:
 }
 ```
 **运行结果**
-![](_v_images/_1525090430_13754.jpg)
+```
+name=apple
+exporter=London
+code=1
+num=33
+price=10.20
+```
+嵌套结构赋值，先找到父结构声明的结构变量fruit，再顺应找到定义子结构变量的字段，例如Pprice，最后找到子结构的字段，使用结构成员运算浮点"."连接为fruit.Pprice.domestic或者fruit.Pprice.abroad。
+```C
+//richieBao 2018-04-30
+struct price{  //定义子结构
+  float domestic;
+  float abroad;
+};
+
+struct form{  //定义父结构
+  char *Pname;
+  int Pcode;
+  int Pnum;
+  struct price Pprice;  //该字段为声明子结构变量Pprice
+  char *Pexporter;
+};
+
+void setup() {
+  Serial.begin(9600);
+  struct form fruit;  //声明父结构变量fruit
+  fruit.Pname="apple";
+  fruit.Pcode=001;
+  fruit.Pnum=33;
+  fruit.Pprice.domestic=10.2;  //为子结构变量字段domestic赋值
+  fruit.Pprice.abroad=60.2;  //为子结构变量字段abroad赋值
+  fruit.Pexporter="London";
+  Serial.print("price_domestic=");Serial.println(fruit.Pprice.domestic);
+  Serial.print("price_abroad=");Serial.println(fruit.Pprice.abroad);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+}
+```
+**运行结果**
+```
+price_domestic=10.20
+price_abroad=60.20
+```
+### 结构变量的初始化
+```C
+struct 结构名{
+    类型说明符 成员名[]；
+    类型说明符 成员名[]；
+    …
+}结构变量={值，值，…}；
+```
+```C
+//richieBao 2018-04-30
+struct price{
+  float domestic;
+  float abroad;
+};
+
+struct form{
+  char *Pname;
+  int Pcode;
+  int Pnum;
+  struct price Pprice;
+  char *Pexporter;
+}fruit={"apple",001,33,{10.2,60.2},"London"};   //待赋予的值放于{ }大括号中，包含的子结构变量也同样放于大括号中
+void setup() {
+  Serial.begin(9600);
+  Serial.print("name=");Serial.println(fruit.Pname);
+  Serial.print("exporter=");Serial.println(fruit.Pexporter);
+  Serial.print("code=");Serial.println(fruit.Pcode);
+  Serial.print("num=");Serial.println(fruit.Pnum);
+  Serial.print("price_domestic=");Serial.println(fruit.Pprice.domestic);
+  Serial.print("price_abroad=");Serial.println(fruit.Pprice.abroad);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly
+}
+```
+**运行结果**
+```
+name=apple
+exporter=London
+code=1
+num=33
+price_domestic=10.20
+price_abroad=60.20
+```
+> 或者先定义结构再声明结构变量时初始化结构变量：`struct form fruit={"apple",001,33,{10.2,60.2},"London"};`
+
+### 结构数组
+如果结构变量不只是包含一组数据，例如`struct form fruit={"apple",001,33,{10.2,60.2},"London"};`只有一种水果及其相关属性值，如果需要同时包含多组数据，则可以使用结构数组。
+```C
+//richieBao 2018-04-30
+struct form{
+  char *Pname;
+  int Pcode;
+  int Pnum;
+  float Price;
+  char *Pexporter;
+};
+
+void setup() {
+  Serial.begin(9600);
+  int i;
+  struct form fruit[3]={
+    {"apple",001,100,10.2,"London"},
+    {"orange",002,200,9.8,"Singapore"},
+    {"banana",003,300,6.6,"Mexcico"}
+  };
+  for(i=0;i<3;i++){     //循环数组的行输出各组数据
+     if(fruit[i].Price<10){  //可以给出条件，打印满足条件的数据
+        Serial.print("name=");Serial.println(fruit[i].Pname);
+        Serial.print("exporter=");Serial.println(fruit[i].Pexporter);
+        Serial.print("code=");Serial.println(fruit[i].Pcode);
+        Serial.print("num=");Serial.println(fruit[i].Pnum);
+        Serial.print("price=");Serial.println(fruit[i].Price);
+    }
+  }
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+}
+```
+**运行结果**
+```
+name=orange
+exporter=Singapore
+code=2
+num=200
+price=9.80
+name=banana
+exporter=Mexcico
+code=3
+num=300
+price=6.60
+```
+上述结构变量初始化等价于：
+```C
+struct form{
+	char *Pname;
+	int Pcode;
+	int Pnum;
+	float Price;
+	char *Pexporter;
+}fruit[3]={
+		{"apple",001,100,10.2,"London"},
+		{"orange",002,200,9.8,"Singapore"},
+		{"banana",003,300,6.6,"Mexcico"}
+	};
+```
+### 结构指针
+结构指针是指针变量指向一个结构变量。结构指针变量的值是指向结构变量的首地址。通过结构指针可以访问结构变量，与数组指针类似。定义的一般形式为：
+![](_v_images/_1525097249_19030.jpg)
+
+```C
+//richieBao 2018-04-30
+struct da_price{  //定义子结构
+  float domestic;
+  float abroad;
+};
+
+struct form{  //定义父结构
+  char *Pname;
+  int Pcode;
+  int Pnum;
+  struct da_price Price;
+  char *Pexporter;
+}fruit[3]={  //初始化赋值
+    {"apple",001,100,{10.2,60.2},"London"},
+    {"orange",002,200,{6.8,68.8},"Singapore"},
+    {"banana",003,300,{9.6,66.6},"Mexcico"}
+  };
+  
+void setup() {
+  Serial.begin(9600);
+  struct form *ptr;  //定义结构指针
+  ptr=fruit;  //初始化结构指针为fruit结构变量的首地址
+  Serial.print("Oname=");Serial.print(fruit[1].Pname);Serial.print(" OPnum=");Serial.println(fruit[1].Pnum);
+  Serial.print("Oname=");Serial.print((*ptr).Pname);Serial.print(" OPnum=");Serial.println((*ptr).Pnum);
+  Serial.print("Oname=");Serial.print((ptr+1)->Pname);Serial.print(" OPnum=");Serial.println((ptr+1)->Pnum);
+  Serial.print("Oname=");Serial.print((ptr+1)->Price.domestic);Serial.print(" OPnum=");Serial.println((*(ptr+1)).Price.abroad);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+}
+```
+**运行结果**
+```
+Oname=orange OPnum=200
+Oname=apple OPnum=100
+Oname=orange OPnum=200
+Oname=6.80 OPnum=68.80
+```
+![](_v_images/_1525098436_20337.jpg)
+
+> `(*结构指针变量).字段`在Arduino C中测试错误。
+
+`(ptr+1)->Price.domestic=(*(ptr+1)).Price.abroad`“.”与"->"为成员(字段)符，“.”用于结构变量.字段，而"->"用于结构指针->字段。"."的优先级高于*及四则运算，因此需要元括弧改变优先级。
+
+ptr+1，因为ptr指向fruit的首地址，即第0行，字段"apple"的首地址。将其加一，直接跳到第1行，即字段"orange"的首地址，以此类推。*(ptr+1)，是获取第1行首地址的数值，即"orange"。
+
+### 位结构
+位结构是一种特殊的结构，用于访问一字节或字的多个位。位结构定义的一般形式：
+```C
+struct 位结构名{
+    数据类型 变量名：整型常数；
+    数据类型 变量名：整型常数；
+}位结构变量;
+```
+```C
+struct{
+unsigned LBitV:8;  //LBitV占用低字节的0～7共8位
+unsigned HBitV 1:4;  //HBitV 1占用高字节的0～3位共4位
+unsigned HBitV2:3;  //HBitV 2占用高字节的4～6位共3位
+unsigned HBitV 3:1;  //HBitV 3占用高字节的7位共1位
+}BitV;
+```
+数据类型必须是Int，unsigned或者signed。整型常数必需是非负的整数，范围在0～15，表示二进制位的个数，即表示有多少位。变量名为可选项，可以不命名，这样规定是为了排列需要。
+
+位结构成员(字段)的访问与结构成员的访问相同，例如BitV.LBitV
+
+需要按位访问数据的位时，采用位结构比使用位运算符方便。在使用位结构时，应注意：
+* 为结构中的成员既可以定义为unsigned，也可以定义为signed。
+* 位结构总长度，即位数是各个位成员定义的位数之和，可以超过两个字节。
+* 当成员长度为1时，会被认为是unsigned的类型，因为单个位不可能具有符号。
+* 位结构中的成员不能使用数组和指针，但位结构变量可以是数组和指针。如果是指针，其成员访问方式同结构指针。
+* 位结构成员可以与其它结构成员一起使用。
+```C
+struct form{
+	char *Pname;
+	int Pcode;
+	int Pnum;
+	struct da_price Price;
+	char *Pexporter;
+	unsigned quarantine:1; //quarantine用于存储是否检疫，而Packing用于存储是否装箱。每个位结构成员只有一位，因此一个字节保存了两个信息，节省存储空间。
+	unsigned packing:1;
+};
+```
+> 位结构部分未在Arduino C中测试。
+
+### 向函数传递结构信息
+结构(变量)可以作为参数传递给函数，或者指向结构(变量)的指针作为参数传递，以及结构(变量)成员作为参数传递。
+#### 传递结构成员
+只要结构成员是具有单个值的数据类型，例如int、char、float、double等，就可以把它作为参数传递给一个可以接受这个特定类型的函数。
+```C
+//richieBao 2018-04-30
+double sum(double,double,double);  //函数声明
+struct da_price{  //定义子结构
+  float domestic;
+  float abroad;
+};
+struct form{  //定义父(多重)结构
+  char *Pname;
+  int Pcode;
+  int Pnum;
+  struct da_price Price;
+  char *Pexporter;
+}fruit[3]={  //初始化结构fruit赋值
+    {"apple",001,100,{10.2,60.2},"London"},
+    {"orange",002,200,{6.8,68.8},"Singapore"},
+    {"banana",003,300,{9.6,66.6},"Mexcico"}
+  };
+  
+void setup() {
+  Serial.begin(9600);
+  Serial.print("国内价格总和=");Serial.print(sum(fruit[0].Price.domestic,fruit[1].Price.domestic,fruit[2].Price.domestic));
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+
+}
+
+double sum(double x,double y,double z){
+  return(x+y+z);
+}
+```
+**运行结果**
+```
+国内价格总和=26.60
+```
+#### 使用结构变量地址
+```C
+//richieBao 2018-04-30
+double sum(const struct form *num);
+struct da_price{
+  float domestic;
+  float abroad;
+};
+
+struct form{
+  char *Pname;
+  int Pcode;
+  int Pnum;
+  struct da_price Price;
+  char *Pexporter;
+}fruit[3]={
+    {"apple",001,100,{10.2,60.2},"London"},
+    {"orange",002,200,{6.8,68.8},"Singapore"},
+    {"banana",003,300,{9.6,66.6},"Mexcico"}
+  };
+  
+void setup() {
+  Serial.begin(9600);
+  Serial.print("数量总和=");Serial.println(sum(fruit));
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+}
+
+double sum(const struct form *num){
+  return(num->Pnum+(num+1)->Pnum+(num+2)->Pnum);
+}
+```
+**运行结果**
+```
+数量总和=600.00
+```
+#### 把结构变量作为参数传递
+只有允许把结构变量作为参数传递的编译器才可以传递结构变量，对于Arduino C测试等大部分编译器暂时无法传递。暂不赘述。
+
+## 联合
+不同数据类型的组成为聚合类型。结构是典型的数据类型，另外在C语言下还有联合及枚举(前文)。
+
+联合类型是将不同变量组织成一个整体的数据类型。这些变量在存储器中占用同一段存储单元，并在不同的时间保存不同的数据类型和不同长度的变量。联合类型也称为共用体。联合的作用类似小型缓存，记录预定义的数据类型。
+### 联合的定义
+```C
+union 联合名{
+数据类型 成员名；
+数据类型 成员名；
+…
+};
+```
+### 联合变量的声明
+```C
+//1.定义联合时声明联合变量
+union 联合名{
+数据类型 成员名；
+数据类型 成员名；
+…
+}联合变量；
+//2.先定义联合，再定义联合变量
+union 联合名{
+数据类型 成员名；
+数据类型 成员名；
+…
+}；
+union 联合名 联合变量名；
+//3.直接声明联合变量(没有联合名)
+union {
+数据类型 成员名；
+数据类型 成员名；
+…
+}联合变量；
+```
+### 联合与结构的区别
+从联合的定义、联合变量的声明、成员的引用到联合变量指针基本同于结构的用法。因此，需要先区别二者之间的差异，这个差异主要在于数据存储的方式。联合变量的成员占用同一个存储空间，而结构变量中的成员分别独占自己的存储空间，互不干扰。对于有不同数据类型组成的联合变量和结构变量，在任何同一时刻，联合变量中只存放一个被选中的成员，对于联合变量的不同成员赋值，将会对其它成员重写，原成员的值就不再存在；而结构的所有成员都存在。
+```C
+//richieBao 2018-04-30
+#include <stdio.h>
+union form{
+  char *Pname;
+  int Pcode;
+  int Pnum;
+  union {
+    float domestic;
+    float abroad;   
+  }Price;
+  char *Pexporter;
+};
+
+void setup() {
+  Serial.begin(9600);
+  union form fruit;
+  fruit.Pname="apple";
+  fruit.Pcode=101; //写入Pcode成员值后，之前对Pname成员的赋值被重写
+  Serial.print("name=");Serial.println(fruit.Pname);
+  Serial.print("Pcode=");Serial.println(fruit.Pcode);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+}
+```
+**运行结果**
+```
+name=??
+Pcode=101
+```
+### 联合变量数组
+给联合变量成员赋值，仅保留最后一个成员的值，如果希望值不被重写，最直接的方式是使用struct结构。如果仍然是使用union联合，则可以考虑使用联合变量数组。以数组的方式给出下标(索引)存储成员值。
+```C
+//richieBao 2018-04-30
+union form{
+  char *Pname;
+  int Pcode;
+  int Pnum;
+  union {
+    float domestic;
+    float abroad;   
+  }Price;
+  char *Pexporter;
+};
+
+void setup() {
+  Serial.begin(9600);
+  union form fruit[6];
+  fruit[0].Pname="apple";
+  fruit[1].Pcode=101;
+  fruit[2].Pnum=100;
+  fruit[3].Price.domestic=10.2;
+  fruit[4].Price.abroad=60.2;
+  fruit[5].Pexporter="London";
+  Serial.print("name=");Serial.println(fruit[0].Pname);
+  Serial.print("exporter=");Serial.println(fruit[5].Pexporter);
+  Serial.print("code=");Serial.println(fruit[1].Pcode);
+  Serial.print("num=");Serial.println(fruit[2].Pnum);
+  Serial.print("price_A=");Serial.println(fruit[4].Price.abroad);
+  Serial.print("price_D=");Serial.println(fruit[3].Price.domestic);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+}
+```
+**运行结果**
+```
+name=apple
+exporter=London
+code=101
+num=100
+price_A=60.20
+price_D=10.20
+```
+## 按位操作符
+
+| 符号 | 描述 | 运算规则 | 汇编语言助记符 |
+| --- | --- | --- | --- |
+| & | 按位与 | 两个位都为1时，结果才为1 | ANL |
+| | | 按位或 | 两个位都为0时，结果才为0 | ORL |
+| ^ | 按位异或 | 两个位相同为0，相异为1 | XRL |
+| ~ | 按位取反| 0变1、1变0 | CPL |
+| << | 左移 | 各二进位全部左移指定位数，高位丢弃，低位补0 | RL/RLC |
+| >> | 右移 | 各二进位全部右移指定位数，对无符号数，高位补0；有符号数，各编译器处理方法不一，可补符号位(算数右移)、可补0(逻辑右移) | R/RRC |
+
+C中有6种位运算符，为&(按位与)、|(按位或)、^(按位异或)、~(按位取反)、<<(左移)和>>(右移)。位运算符的作用是按位对变量运算，并不改变参与运算变量的值。位运算符只能用于整型操作，即只能用于带符号或无符号的char、short、int与long类型。在实际应用中建议用unsigned无符号整型操作数，因为带有符号操作数可能因为不同器件结果不同。
+单片机中所有数据都是以二进制形式存储，而位运算是直接对二进制数操作，因此处理数据的速度非常快。位运算符的优先级从高到底依次为：按位取反(~)、左移(<<)、右移(>>)、按位与(&)、按位异或(^)、按位或(|)。
+
+### &按位与典型用法
+1. 取一个位串信息的某几位，例如x& 0xF0(P2 & 0xF0)，如果x为10010101，即10010101&11110000，结果为1001000，可见高4为被提取出来保持数值不变，低4为全部为0；
+2. 让某变量保留某几位，例如x&= 0xF0，&=为复合赋值运算符_逻辑与赋值，相当于x=x & 0xF0。0xF0为设计好的一个常数，该常数种只有需要的为是1，不需要的位则为0。
+
+### |按位或典型用法：
+将一个位串信息的某几位置1。例如x|=0xF0(P2 |=0xF0)，|=为复合赋值运算符_逻辑或赋值，相当于x=x|0xF0。如果x为10010101，即10010101|11110000，结果为11110101，高4位全部变成1，低4位保持不变。
+
+### ^按位异或典型用法
+求一个位串信息某几位信息的反。例如x^=0xF0，^=为复合赋值运算符_逻辑异或赋值，相当于x=x ^ 0xF0，如果x=10010101，即10010101|11110000，结果为01100101，高4位求得其反，低4位保持不变。
+
+### ~按位取反典型用法
+相关于一个已知常数，将一个位串信息的某几位置0。例如x=x & ~0xF0，如果x为10010101，即10010101 & ~11110000=10010101 & 00001111=00000101，可见高4位置0，低4位保持不变。
+
+### <<左移与>>右移配合位运算能够实现多种位串运算有关的复杂计算
+* ~(~0<<n)，实现最低n位为1，其余位为0的位串信息，注意优先级计算；
+* (x>>(1+p-n)) & ~(~0<<n)，截取变量x自p位开始，右边n位的信息；
+* new|= ((old>>row)&1)<<(15-k)，截取old变量第row位，并将该位信息装配到变量new的第15-k位；
+* s&= ~(1<<j)，将变量s的第j位置置0，其余位保持不变；
+* for(j=0;((1<<j)&s)==0;j++)，设s不等于全0，代码寻找最右边为1的位的序号j。
+
+
+
+
+
+
+
+
+
+
+
