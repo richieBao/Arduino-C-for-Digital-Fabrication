@@ -8,4 +8,4 @@
 * Arduino C是C语言的变种，在科学实验中掌握至少2门语言很有必要，首选python用于数据分析，以及机器学习/深度学习等内容，而C则可以在嵌入式系统中发挥特长。
 
 # [沐本工坊](http://robot-x.top/robot/index.php)
-![](_images/801.jpeg)
+![](_images/_801.jpeg)
